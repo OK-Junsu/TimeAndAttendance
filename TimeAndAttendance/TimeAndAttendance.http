@@ -1,6 +1,1 @@
-@TimeAndAttendance_HostAddress = http://localhost:5195
-
-GET {{TimeAndAttendance_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
+@TimeAndAttendance_HostAddress = https://localhost:7217

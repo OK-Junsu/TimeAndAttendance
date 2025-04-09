@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User</title>
+    <link rel="stylesheet" href="Style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Edit User</h1>
+        <form id="editUserForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="joiningDate">Joining Date:</label>
+            <input type="date" id="joiningDate" name="joiningDate" required>
+            <label for="resignationDate">Resignation Date:</label>
+            <input type="date" id="resignationDate" name="resignationDate">
+            <div class="form-actions">
+                <button type="submit" class="button">Update</button>
+                <a href="List.html" class="button cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+    <script src="Edit.js"></script>
+</body>
+</html>
