@@ -1,108 +1,106 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TimeAndAttendance.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using TimeAndAttendance.Models;
+using TimeAndAttendance.Services;
 
 namespace TimeAndAttendance.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController(UserService service) : ControllerBase
     {
-        private readonly DataContext _context;
-
-        public UsersController(DataContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/Users
+        /// <summary>
+        /// GET: api/Users
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
-        }
+            var users = await service.GetAllUsersAsync();
 
-        // GET: api/Users/5
+            return Ok(users);
+        }
+        /// <summary>
+        /// GET: api/Users/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var existingUser = await service.GetUserByIdAsync(id);
+            if (existingUser == null) return NotFound();
 
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return user;
+            return existingUser;
         }
-
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
-        {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// POST: api/Users
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            var createdUser = await service.CreateUserAsync(user);
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
         }
-
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        /// <summary>
+        /// PUT: api/Users/SoftPut/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPut("SoftPut/{id}")]
+        public async Task<IActionResult> SoftPutUser(int id, User user)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (id != user.Id) return BadRequest();
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            var succeeded = await service.SoftPutUserAsync(id, user);
+            if (!succeeded) return NotFound();
 
             return NoContent();
         }
-
-        private bool UserExists(int id)
+        /// <summary>
+        /// PUT: api/Users/HardPut/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPut("HardPut/{id}")]
+        public async Task<IActionResult> HardPutUser(int id, User user)
         {
-            return _context.Users.Any(e => e.Id == id);
+            if (id != user.Id) return BadRequest();
+
+            var succeeded = await service.HardPutUserAsync(id, user);
+            if (!succeeded) return NotFound();
+
+            return NoContent();
+        }
+        /// <summary>
+        /// PUT: api/Users/SoftDelete/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPut("SoftDelete/{id}")]
+        public async Task<IActionResult> SoftDeleteUser(int id)
+        {
+            var succeeded = await service.SoftDeleteUserAsync(id);
+            if (!succeeded) return NotFound();
+
+            return NoContent();
+        }
+        /// <summary>
+        /// DELETE: api/Users/HardDelete/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete("HardDelete/{id}")]
+        public async Task<IActionResult> HardDeleteUser(int id)
+        {
+            var succeeded = await service.HardDeleteUserAsync(id);
+            if (!succeeded) return NotFound();
+
+            return NoContent();
         }
     }
 }
