@@ -10,12 +10,10 @@ namespace TimeAndAttendance.Models
         /// <summary>
         /// 출근
         /// </summary>
-        [Description("Check In")]
-        CheckIn,
+        In,
         /// <summary>
         /// 퇴근
         /// </summary>
-        [Description("Check Out")]
-        CheckOut
+        Out
     }
 }

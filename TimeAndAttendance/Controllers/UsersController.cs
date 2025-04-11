@@ -13,22 +13,22 @@ namespace TimeAndAttendance.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<User>>> GetAllItems()
         {
-            var users = await service.GetAllUsersAsync();
+            var items = await service.GetAllItems();
 
-            return Ok(users);
+            return Ok(items);
         }
         /// <summary>
         /// GET: api/Users/NotDeleted
         /// </summary>
         /// <returns></returns>
         [HttpGet("NotDeleted")]
-        public async Task<ActionResult<IEnumerable<User>>> GetNotDeletedUsers()
+        public async Task<ActionResult<IEnumerable<User>>> GetNotDeletedItems()
         {
-            var users = await service.GetNotDeletedUsersAsync();
+            var items = await service.GetNotDeletedItems();
 
-            return Ok(users);
+            return Ok(items);
         }
         /// <summary>
         /// GET: api/Users/5
@@ -36,37 +36,37 @@ namespace TimeAndAttendance.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<User>> GetItemById(int id)
         {
-            var existingUser = await service.GetUserByIdAsync(id);
-            if (existingUser == null) return NotFound();
+            var existingItem = await service.GetItemById(id);
+            if (existingItem == null) return NotFound();
 
-            return existingUser;
+            return existingItem;
         }
         /// <summary>
         /// POST: api/Users
         /// </summary>
-        /// <param name="user"></param>
+        /// <param name="newItem"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> PostItem(User newItem)
         {
-            var createdUser = await service.CreateUserAsync(user);
+            var createdItem = await service.PostItem(newItem);
 
-            return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
+            return CreatedAtAction(nameof(GetItemById), new { id = createdItem.Id }, createdItem);
         }
         /// <summary>
         /// PUT: api/Users/SoftPut/5
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="user"></param>
+        /// <param name="modifiedItem"></param>
         /// <returns></returns>
         [HttpPut("SoftPut/{id}")]
-        public async Task<IActionResult> SoftPutUser(int id, User user)
+        public async Task<IActionResult> SoftPutItem(int id, User modifiedItem)
         {
-            if (id != user.Id) return BadRequest();
+            if (id != modifiedItem.Id) return BadRequest();
 
-            var succeeded = await service.SoftPutUserAsync(id, user);
+            var succeeded = await service.SoftPutItem(id, modifiedItem);
             if (!succeeded) return NotFound();
 
             return NoContent();
@@ -75,14 +75,14 @@ namespace TimeAndAttendance.Controllers
         /// PUT: api/Users/HardPut/5
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="user"></param>
+        /// <param name="modifiedItem"></param>
         /// <returns></returns>
         [HttpPut("HardPut/{id}")]
-        public async Task<IActionResult> HardPutUser(int id, User user)
+        public async Task<IActionResult> HardPutItem(int id, User modifiedItem)
         {
-            if (id != user.Id) return BadRequest();
+            if (id != modifiedItem.Id) return BadRequest();
 
-            var succeeded = await service.HardPutUserAsync(id, user);
+            var succeeded = await service.HardPutItem(id, modifiedItem);
             if (!succeeded) return NotFound();
 
             return NoContent();
@@ -93,9 +93,9 @@ namespace TimeAndAttendance.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPut("SoftDelete/{id}")]
-        public async Task<IActionResult> SoftDeleteUser(int id)
+        public async Task<IActionResult> SoftDeleteItem(int id)
         {
-            var succeeded = await service.SoftDeleteUserAsync(id);
+            var succeeded = await service.SoftDeleteItem(id);
             if (!succeeded) return NotFound();
 
             return NoContent();
@@ -106,9 +106,9 @@ namespace TimeAndAttendance.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete("HardDelete/{id}")]
-        public async Task<IActionResult> HardDeleteUser(int id)
+        public async Task<IActionResult> HardDeleteItem(int id)
         {
-            var succeeded = await service.HardDeleteUserAsync(id);
+            var succeeded = await service.HardDeleteItem(id);
             if (!succeeded) return NotFound();
 
             return NoContent();
@@ -118,9 +118,9 @@ namespace TimeAndAttendance.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("HardDelete")]
-        public async Task<IActionResult> HardDeleteAllUsers()
+        public async Task<IActionResult> HardDeleteAllItems()
         {
-            var succeeded = await service.HardDeleteAllUsersAsync();
+            var succeeded = await service.HardDeleteAllItems();
             if (!succeeded) return NotFound();
 
             return NoContent();

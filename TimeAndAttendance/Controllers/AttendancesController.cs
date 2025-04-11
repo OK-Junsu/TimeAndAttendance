@@ -1,108 +1,142 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TimeAndAttendance.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using TimeAndAttendance.Models;
+using TimeAndAttendance.Services;
 
 namespace TimeAndAttendance.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AttendancesController : ControllerBase
+    public class AttendancesController(AttendanceService service) : ControllerBase
     {
-        private readonly DataContext _context;
-
-        public AttendancesController(DataContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/Attendances
+        /// <summary>
+        /// GET: api/Attendances
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Attendance>>> GetAttendances()
+        public async Task<ActionResult<IEnumerable<Attendance>>> GetAllItems()
         {
-            return await _context.Attendances.ToListAsync();
-        }
+            var items = await service.GetAllItems();
 
-        // GET: api/Attendances/5
+            return Ok(items);
+        }
+        /// <summary>
+        /// GET: api/Attendances/NotDeleted
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("NotDeleted")]
+        public async Task<ActionResult<IEnumerable<Attendance>>> GetNotDeletedItems()
+        {
+            var items = await service.GetNotDeletedItems();
+
+            return Ok(items);
+        }
+        /// <summary>
+        /// GET: api/Attendances/UserId/5
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("UserId/{userId}")]
+        public async Task<ActionResult<IEnumerable<Attendance>>> GetItemsByUserId(int userId)
+        {
+            var items = await service.GetItemsByUserId(userId);
+            if (items == null) return NotFound();
+
+            return Ok(items);
+        }
+        /// <summary>
+        /// GET: api/Attendances/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Attendance>> GetAttendance(int id)
+        public async Task<ActionResult<Attendance>> GetItemById(int id)
         {
-            var attendance = await _context.Attendances.FindAsync(id);
+            var existingItem = await service.GetItemById(id);
+            if (existingItem == null) return NotFound();
 
-            if (attendance == null)
-            {
-                return NotFound();
-            }
-
-            return attendance;
+            return existingItem;
         }
-
-        // PUT: api/Attendances/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAttendance(int id, Attendance attendance)
-        {
-            if (id != attendance.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(attendance).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AttendanceExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Attendances
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// POST: api/Attendances
+        /// </summary>
+        /// <param name="newItem"></param>
+        /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<Attendance>> PostAttendance(Attendance attendance)
+        public async Task<ActionResult<Attendance>> PostItem(Attendance newItem)
         {
-            _context.Attendances.Add(attendance);
-            await _context.SaveChangesAsync();
+            var createdAttendance = await service.PostItem(newItem);
 
-            return CreatedAtAction("GetAttendance", new { id = attendance.Id }, attendance);
+            return CreatedAtAction(nameof(GetItemById), new { id = createdAttendance.Id }, createdAttendance);
         }
-
-        // DELETE: api/Attendances/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAttendance(int id)
+        /// <summary>
+        /// PUT: api/Attendances/SoftPut/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="modifiedItem"></param>
+        /// <returns></returns>
+        [HttpPut("SoftPut/{id}")]
+        public async Task<IActionResult> SoftPutItem(int id, Attendance modifiedItem)
         {
-            var attendance = await _context.Attendances.FindAsync(id);
-            if (attendance == null)
-            {
-                return NotFound();
-            }
+            if (id != modifiedItem.Id) return BadRequest();
 
-            _context.Attendances.Remove(attendance);
-            await _context.SaveChangesAsync();
+            var succeeded = await service.SoftPutItem(id, modifiedItem);
+            if (!succeeded) return NotFound();
 
             return NoContent();
         }
-
-        private bool AttendanceExists(int id)
+        /// <summary>
+        /// PUT: api/Attendances/HardPut/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="modifiedItem"></param>
+        /// <returns></returns>
+        [HttpPut("HardPut/{id}")]
+        public async Task<IActionResult> HardPutItem(int id, Attendance modifiedItem)
         {
-            return _context.Attendances.Any(e => e.Id == id);
+            if (id != modifiedItem.Id) return BadRequest();
+
+            var succeeded = await service.HardPutItem(id, modifiedItem);
+            if (!succeeded) return NotFound();
+
+            return NoContent();
+        }
+        /// <summary>
+        /// PUT: api/Attendances/SoftDelete/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPut("SoftDelete/{id}")]
+        public async Task<IActionResult> SoftDeleteItem(int id)
+        {
+            var succeeded = await service.SoftDeleteItem(id);
+            if (!succeeded) return NotFound();
+
+            return NoContent();
+        }
+        /// <summary>
+        /// DELETE: api/Attendances/HardDelete/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete("HardDelete/{id}")]
+        public async Task<IActionResult> HardDeleteItem(int id)
+        {
+            var succeeded = await service.HardDeleteItem(id);
+            if (!succeeded) return NotFound();
+
+            return NoContent();
+        }
+        /// <summary>
+        /// DELETE: api/Attendances/HardDelete
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete("HardDelete")]
+        public async Task<IActionResult> HardDeleteAllItems()
+        {
+            var succeeded = await service.HardDeleteAllItems();
+            if (!succeeded) return NotFound();
+
+            return NoContent();
         }
     }
 }

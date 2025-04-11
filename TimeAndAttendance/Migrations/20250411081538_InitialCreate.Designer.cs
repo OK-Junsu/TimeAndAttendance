@@ -11,7 +11,7 @@ using TimeAndAttendance.Data;
 namespace TimeAndAttendance.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250410084059_InitialCreate")]
+    [Migration("20250411081538_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -29,9 +29,6 @@ namespace TimeAndAttendance.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("TEXT");
 
@@ -40,6 +37,9 @@ namespace TimeAndAttendance.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");

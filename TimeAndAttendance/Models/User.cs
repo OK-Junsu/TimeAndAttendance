@@ -5,7 +5,6 @@
     /// </summary>
     public class User : PostInfo
     {
-        public int Id { get; set; }
         /// <summary>
         /// 이름
         /// </summary>

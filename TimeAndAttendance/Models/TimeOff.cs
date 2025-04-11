@@ -5,7 +5,6 @@
     /// </summary>
     public class TimeOff : PostInfo
     {
-        public int Id { get; set; }
         /// <summary>
         /// 사용자 ID
         /// </summary>

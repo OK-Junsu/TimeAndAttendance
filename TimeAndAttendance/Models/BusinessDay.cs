@@ -5,7 +5,6 @@
     /// </summary>
     public class BusinessDay : PostInfo
     {
-        public int Id { get; set; }
         public DateOnly Date { get; set; }
         /// <summary>
         /// 유형

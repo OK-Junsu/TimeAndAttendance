@@ -5,15 +5,14 @@
     /// </summary>
     public class Attendance : PostInfo
     {
-        public int Id { get; set; }
         /// <summary>
         /// 사용자 ID
         /// </summary>
         public int UserId { get; set; }
         /// <summary>
-        /// 날짜
+        /// 시간
         /// </summary>
-        public DateOnly Date { get; set; }
+        public DateTime Time { get; set; }
         /// <summary>
         /// 상태
         /// </summary>

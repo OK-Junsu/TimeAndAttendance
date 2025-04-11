@@ -3,8 +3,11 @@ using TimeAndAttendance.Models;
 
 namespace TimeAndAttendance.Services
 {
-    public class BusinessDayService(DataContext context)
+    public class BusinessDayService(DataContext context) : CommonService<BusinessDay>(context, context.BusinessDays)
     {
+        private readonly DataContext _context = context;
+
+
         private static List<BusinessDay> GetBusinessDays(int year)
         {
             var weekends = new List<BusinessDay>();
