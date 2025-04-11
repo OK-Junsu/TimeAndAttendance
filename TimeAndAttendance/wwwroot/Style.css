@@ -26,6 +26,13 @@ h1 {
     margin-bottom: 20px;
 }
 
+.actions-btm {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 .button {
     display: inline-block;
     padding: 10px 20px;
@@ -90,3 +97,16 @@ table {
         background-color: #5a6268;
     }
 
+.checkbox-container {
+    text-align: right;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.hard-delete-all-btn {
+    background-color: #dc3545;
+}
+
+    .hard-delete-all-btn:hover {
+        background-color: #c82333;
+    }

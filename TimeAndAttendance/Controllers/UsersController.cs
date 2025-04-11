@@ -8,7 +8,7 @@ namespace TimeAndAttendance.Controllers
     [ApiController]
     public class UsersController(UserService service) : ControllerBase
     {
-        /// <summary>
+        /// <summary> 
         /// GET: api/Users
         /// </summary>
         /// <returns></returns>
@@ -16,6 +16,17 @@ namespace TimeAndAttendance.Controllers
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             var users = await service.GetAllUsersAsync();
+
+            return Ok(users);
+        }
+        /// <summary>
+        /// GET: api/Users/NotDeleted
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("NotDeleted")]
+        public async Task<ActionResult<IEnumerable<User>>> GetNotDeletedUsers()
+        {
+            var users = await service.GetNotDeletedUsersAsync();
 
             return Ok(users);
         }
@@ -98,6 +109,18 @@ namespace TimeAndAttendance.Controllers
         public async Task<IActionResult> HardDeleteUser(int id)
         {
             var succeeded = await service.HardDeleteUserAsync(id);
+            if (!succeeded) return NotFound();
+
+            return NoContent();
+        }
+        /// <summary>
+        /// DELETE: api/Users/HardDelete
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete("HardDelete")]
+        public async Task<IActionResult> HardDeleteAllUsers()
+        {
+            var succeeded = await service.HardDeleteAllUsersAsync();
             if (!succeeded) return NotFound();
 
             return NoContent();

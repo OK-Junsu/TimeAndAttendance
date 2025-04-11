@@ -1,9 +1,13 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
+    const hardDeleteAllBtn = document.querySelector("#hardDeleteAllBtn");
+    const includeDeletedCheckbox = document.querySelector("#includeDeleted");
     const tableBody = document.querySelector("#userTable tbody");
 
     // Fetch and display users
     function fetchUsers() {
-        fetch("/api/Users")
+        tableBody.innerHTML = ""; // Clear existing rows before fetching new data
+        const endpoint = includeDeletedCheckbox.checked ? "/api/Users" : "/api/Users/NotDeleted";
+        fetch(endpoint)
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Failed to fetch users");
@@ -20,8 +24,8 @@
                         <td>${user.name}</td>
                         <td>${user.joiningDate}</td>
                         <td>${user.resignationDate || "N/A"}</td>
-                        <td>${formatToLocalDateTime(user.deletedAt) || "N/A"}</td>
-                        <td>${user.originId || "N/A"}</td>
+                        <td>${user.deletedAt ? formatToLocalDateTime(user.deletedAt) : "N/A"}</td>
+                        <td>${user.originId ? user.originId : "N/A"}</td>
                         <td>
                             <a href="Edit.html?id=${user.id}" class="edit-btn">Edit</a>
                             <button class="softDelete-btn" data-id="${user.id}">Soft Delete</button>
@@ -31,73 +35,69 @@
 
                     tableBody.appendChild(row);
                 });
-
-                attachSoftDeleteListeners();
-                attachHardDeleteListeners();
             })
             .catch(error => {
                 console.error("Error fetching users:", error);
             });
     }
 
-    // Soft delete a user
-    function softDeleteUser(id) {
-        fetch(`/api/Users/SoftDelete/${id}`, {
-            method: "PUT"
-        })
+    // Event listener for Hard Delete All button
+    hardDeleteAllBtn.addEventListener("click", () => {
+        if (confirm("Are you sure you want to hard delete all users? This action cannot be undone.")) {
+            fetch("/api/Users/HardDelete", { method: "DELETE" })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to hard delete all users");
+                    }
+                    alert("All users have been hard deleted successfully!");
+                    fetchUsers(); // Refresh the table
+                })
+                .catch(error => {
+                    alert("Error hard deleting all users. Please try again.");
+                    console.error("Error hard deleting all users:", error);
+                });
+        }
+    });
+
+    // Attach event listener to the checkbox
+    includeDeletedCheckbox.addEventListener("change", () => {
+        fetchUsers();
+    });
+
+    // Attach (hard or soft) delete event listeners
+    document.addEventListener("click", (event) => {
+        if (event.target.classList.contains("softDelete-btn")) {
+            const id = event.target.getAttribute("data-id");
+            if (confirm("Are you sure you want to soft delete this user?")) {
+                deleteUser(id, "soft");
+            }
+        }
+
+        if (event.target.classList.contains("hardDelete-btn")) {
+            const id = event.target.getAttribute("data-id");
+            if (confirm("Are you sure you want to hard delete this user?")) {
+                deleteUser(id, "hard");
+            }
+        }
+    });
+
+    // Delete a user
+    function deleteUser(id, type) {
+        const endpoint = type === "soft" ? `/api/Users/SoftDelete/${id}` : `/api/Users/HardDelete/${id}`;
+        const method = type === "soft" ? "PUT" : "DELETE";
+
+        fetch(endpoint, { method })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error("Failed to soft delete user");
+                    throw new Error(`Failed to ${type} delete user`);
                 }
-                alert("User soft deleted successfully!");
+                alert(`User ${type} deleted successfully!`);
                 fetchUsers(); // Refresh the table
             })
             .catch(error => {
-                alert("Error soft deleting user. Please try again.");
-                console.error("Error soft deleting user:", error);
+                alert(`Error ${type} deleting user. Please try again.`);
+                console.error(`Error ${type} deleting user:`, error);
             });
-    }
-
-    // Hard delete a user
-    function hardDeleteUser(id) {
-        fetch(`/api/Users/HardDelete/${id}`, {
-            method: "DELETE"
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Failed to hard delete user");
-                }
-                alert("User hard deleted successfully!");
-                fetchUsers(); // Refresh the table
-            })
-            .catch(error => {
-                alert("Error hard deleting user. Please try again.");
-                console.error("Error hard deleting user:", error);
-            });
-    }
-
-    // Attach hard delete event listeners
-    function attachSoftDeleteListeners() {
-        document.querySelectorAll(".softDelete-btn").forEach(button => {
-            button.addEventListener("click", () => {
-                const id = button.getAttribute("data-id");
-                if (confirm("Are you sure you want to soft delete this user?")) {
-                    softDeleteUser(id);
-                }
-            });
-        });
-    }
-
-    // Attach soft delete event listeners
-    function attachHardDeleteListeners() {
-        document.querySelectorAll(".hardDelete-btn").forEach(button => {
-            button.addEventListener("click", () => {
-                const id = button.getAttribute("data-id");
-                if (confirm("Are you sure you want to hard delete this user?")) {
-                    hardDeleteUser(id);
-                }
-            });
-        });
     }
 
     function formatToLocalDateTime(dateTimeString) {
