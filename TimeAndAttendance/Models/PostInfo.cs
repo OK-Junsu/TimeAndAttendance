@@ -28,5 +28,13 @@ namespace TimeAndAttendance.Models
         /// 원본 게시물 ID
         /// </summary>
         public int? OriginId { get; set; }
+
+
+        /// <summary>
+        /// 덮어쓰기
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="modifiedItem"></param>
+        public abstract void Overwrite<T>(T modifiedItem) where T : PostInfo;
     }
 }

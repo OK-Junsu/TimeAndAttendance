@@ -81,6 +81,24 @@ namespace TimeAndAttendance.Services
             return true;
         }
         /// <summary>
+        /// 하드 수정
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="modifiedItem"></param>
+        /// <returns></returns>
+        public async Task<bool> HardPutItem(int id, T modifiedItem)
+        {
+            var existingUser = await GetItemById(id);
+            if (existingUser == null || existingUser.IsDeleted) return false;
+
+            existingUser.Overwrite(modifiedItem);
+
+            _context.Entry(existingUser).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        /// <summary>
         /// 소프트 삭제
         /// </summary>
         /// <param name="id"></param>

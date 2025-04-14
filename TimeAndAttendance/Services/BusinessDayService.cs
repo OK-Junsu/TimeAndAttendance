@@ -8,27 +8,45 @@ namespace TimeAndAttendance.Services
         private readonly DataContext _context = context;
 
 
-        private static List<BusinessDay> GetBusinessDays(int year)
+        public async Task ReArrangeWeekends(int year)
         {
-            var weekends = new List<BusinessDay>();
+            var existingItems = _context.BusinessDays.Any()
+                ? _context.BusinessDays.Where(e => e.Date.Year == year &&
+                                                   e.Type == BusinessDayType.Weekend &&
+                                                   !e.DeletedAt.HasValue).ToList() : [];
+            var newItems = GetWeekends(year);
 
-            foreach (var day in Enumerable.Range(1, (DateTime.IsLeapYear(year) ? 366 : 365)))
+            // 기존 목록과 새로운 목록의 개수가 다르므로
+            // SoftPut 하지 않고 전체 SoftDelete 후 새 목록 추가
+            if (existingItems.Count != newItems.Count)
             {
-                var date = new DateTime(year, 1, 1).AddDays(day - 1);
-
-                if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+                // 기존 목록 삭제
+                foreach (var item in existingItems)
                 {
-                    weekends.Add(new BusinessDay
+                    await SoftDeleteItem(item.Id);
+                }
+
+                // 새로운 목록 추가
+                foreach (var item in newItems)
+                {
+                    await PostItem(item);
+                }
+            }
+        }
+        public List<BusinessDay> GetWeekends(int year)
+        {
+            return [.. Enumerable.Range(1, (DateTime.IsLeapYear(year) ? 366 : 365))
+                .Select(day => new DateTime(year, 1, 1).AddDays(day - 1))
+                .Where(date => date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+                .Select(date =>
+                {
+                    return new BusinessDay
                     {
-                        Id = day,
                         Date = new DateOnly(date.Year, date.Month, date.Day),
                         Type = BusinessDayType.Weekend,
                         Description = BusinessDayType.Weekend.ToString()
-                    });
-                }
-            }
-
-            return [];
+                    };
+                })];
         }
     }
 }

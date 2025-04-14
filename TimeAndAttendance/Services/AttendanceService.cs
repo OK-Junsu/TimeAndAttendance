@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TimeAndAttendance.Data;
+﻿using TimeAndAttendance.Data;
 using TimeAndAttendance.Models;
 
 namespace TimeAndAttendance.Services
@@ -19,19 +18,6 @@ namespace TimeAndAttendance.Services
             var all = await GetAllItems();
 
             return [.. all.Where(e => e.UserId == userId)];
-        }
-        public async Task<bool> HardPutItem(int id, Attendance modifiedItem)
-        {
-            var existingUser = await GetItemById(id);
-            if (existingUser == null || existingUser.IsDeleted) return false;
-
-            existingUser.Time = modifiedItem.Time;
-            existingUser.Status = modifiedItem.Status;
-
-            _context.Entry(existingUser).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return true;
         }
     }
 }

@@ -11,7 +11,7 @@ using TimeAndAttendance.Data;
 namespace TimeAndAttendance.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250411081538_InitialCreate")]
+    [Migration("20250414005844_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

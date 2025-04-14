@@ -5,6 +5,18 @@
     background-color: #f4f4f9;
 }
 
+.home-container {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
 .container {
     max-width: 1000px;
     margin: 50px auto;
@@ -98,9 +110,11 @@ table {
     }
 
 .checkbox-container {
-    text-align: right;
     margin-top: 10px;
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .hard-delete-all-btn {
@@ -110,3 +124,18 @@ table {
     .hard-delete-all-btn:hover {
         background-color: #c82333;
     }
+
+.filter-container {
+    display: flex;
+    align-items: center; /* 수직 가운데 정렬 */
+    gap: 10px; /* 요소 간 간격 */
+    margin-bottom: 20px; /* 아래 여백 */
+    justify-content: flex-start; /* 왼쪽 정렬 */
+}
+
+.dropdown {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}

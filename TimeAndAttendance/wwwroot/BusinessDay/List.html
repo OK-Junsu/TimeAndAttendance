@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Day Table</title>
+    <link rel="stylesheet" href="../Style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Business Day List</h1>
+        <div class="actions">
+            <a href="Create.html" class="button">New</a>
+            <a href="../Home.html" class="button back-btn">Back</a>
+        </div>
+        <div class="filter-container">
+            <select id="yearFilter" class="dropdown">
+                <option value="">All Years</option>
+            </select>
+            <select id="monthFilter" class="dropdown">
+                <option value="">All Months</option>
+            </select>
+            <div class="checkbox-container">
+                <input type="checkbox" id="includeDeleted" name="includeDeleted" checked="checked">
+                <label for="includeDeleted">Include Deleted</label>
+            </div>
+        </div>
+        <table id="businessDayTable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Deleted Date</th>
+                    <th>Origin Id</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be dynamically populated -->
+            </tbody>
+        </table>
+        <div class="actions-btm">
+            <button id="hardDeleteAllBtn" class="button hard-delete-all-btn">Hard Delete All</button>
+        </div>
+    </div>
+    <script src="List.js"></script>
+</body>
+</html>

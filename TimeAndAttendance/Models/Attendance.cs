@@ -17,5 +17,24 @@
         /// 상태
         /// </summary>
         public AttendanceStatus Status { get; set; }
+
+
+        /// <summary>
+        /// 덮어쓰기
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="modifiedItem"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public override void Overwrite<T>(T modifiedItem)
+        {
+            if (modifiedItem is Attendance item)
+            {
+                UserId = item.UserId;
+                Time = item.Time;
+                Status = item.Status;
+            }
+            else
+                throw new InvalidOperationException("Invalid type for cloning.");
+        }
     }
 }
