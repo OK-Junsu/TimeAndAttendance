@@ -34,7 +34,7 @@
                 Status = item.Status;
             }
             else
-                throw new InvalidOperationException("Invalid type for cloning.");
+                throw new InvalidOperationException(OverwriteErrorMessage);
         }
     }
 }

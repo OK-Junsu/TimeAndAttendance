@@ -36,5 +36,6 @@ namespace TimeAndAttendance.Models
         /// <typeparam name="T"></typeparam>
         /// <param name="modifiedItem"></param>
         public abstract void Overwrite<T>(T modifiedItem) where T : PostInfo;
+        public const string OverwriteErrorMessage = "Cannot overwrite with different type";
     }
 }

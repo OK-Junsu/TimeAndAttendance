@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Time-Off</title>
+    <link rel="stylesheet" href="../Style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Create Time-Off</h1>
+        <form id="createTimeOffForm">
+            <label for="userId">User Id:</label>
+            <input type="number" id="userId" name="userId" required>
+
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="type">Type:</label>
+            <input type="text" id="type" name="type" required>
+
+            <div class="form-actions">
+                <button type="submit" class="button">Create</button>
+                <a href="List.html" class="button cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+    <script src="Create.js"></script>
+</body>
+</html>

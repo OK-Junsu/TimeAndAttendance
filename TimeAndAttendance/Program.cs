@@ -27,6 +27,7 @@ builder.Services.AddHostedService<DatabaseInitializer>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AttendanceService>();
 builder.Services.AddScoped<BusinessDayService>();
+builder.Services.AddScoped<TimeOffService>();
 
 var app = builder.Build();
 
