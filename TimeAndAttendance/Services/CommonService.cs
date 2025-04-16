@@ -49,16 +49,8 @@ namespace TimeAndAttendance.Services
         /// <returns></returns>
         public async Task<T> PostItem(T newItem, bool isSoftPut = false)
         {
-            if (isSoftPut)
-            {
-                newItem.OriginId = newItem.Id;
-                newItem.Id = await GetNextId();
-            }
-            else
-            {
-                newItem.Id = await GetNextId();
-                newItem.OriginId = newItem.Id;
-            }
+            newItem.Id = await GetNextId();
+            if (!isSoftPut) newItem.OriginId = newItem.Id;
 
             table.Add(newItem);
             await _context.SaveChangesAsync();
@@ -76,6 +68,10 @@ namespace TimeAndAttendance.Services
             var succeeded = await SoftDeleteItem(id);
             if (!succeeded) return false;
 
+            var originItem = await GetItemById(id);
+            if (originItem == null) return false;
+
+            modifiedItem.OriginId = originItem.OriginId;
             await PostItem(modifiedItem, true);
 
             return true;
