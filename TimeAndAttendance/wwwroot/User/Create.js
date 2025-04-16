@@ -7,7 +7,7 @@
         const user = {
             name: form.name.value,
             joiningDate: form.joiningDate.value,
-            resignationDate: form.resignationDate.value || null
+            resignationDate: null
         };
 
         fetch("/api/Users", {

@@ -1,45 +1,163 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
-    const hardDeleteAllBtn = document.querySelector("#hardDeleteAllBtn");
+    const clearAllFilter = document.querySelector("#clearAllFilter");
+    const nameFilter = document.querySelector("#nameFilter");
+    const dateFilter = document.querySelector("#dateFilter");
     const includeDeletedCheckbox = document.querySelector("#includeDeleted");
     const tableBody = document.querySelector("#userTable tbody");
+    const hardDeleteAllBtn = document.querySelector("#hardDeleteAllBtn");
+
+    let allItems = []; // 전체 데이터를 저장
+    let filteredItems = []; // 필터링 된 데이터를 저장
+
+    // 데이터를 테이블에 렌더링
+    function renderTable(data) {
+        tableBody.innerHTML = "";
+        data.forEach(item => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${item.id}</td>
+                <td>${item.name}</td>
+                <td>${item.joiningDate}</td>
+                <td>${item.resignationDate || ""}</td>
+                <td>${item.deletedAt ? formatToLocalDateTime(item.deletedAt) : ""}</td>
+                <td>${item.originId ? item.originId : ""}</td>
+                <td>
+                    <a href="Edit.html?id=${item.id}" class="edit-btn">Edit</a>
+                    <button class="softDelete-btn" data-id="${item.id}">Soft Delete</button>
+                    <button class="hardDelete-btn" data-id="${item.id}">Hard Delete</button>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+
+        // Update tableSummary
+        totalItemsCount.textContent = allItems.length;
+        filteredItemsCount.textContent = filteredItems.length;
+    }
+
+    // Name 드롭다운 채우기
+    function populateNameDropdown(selectedDate) {
+        const names = [...new Set(allItems
+            .filter(item => includeDeletedCheckbox.checked || !item.deletedAt)
+            .filter(item => !selectedDate || item.joiningDate === selectedDate)
+            .map(item => item.name))].sort((a, b) => a - b);
+
+        nameFilter.innerHTML = '<option value="">All Names</option>';
+        names.forEach(name => {
+            const option = document.createElement("option");
+            option.value = name;
+            option.textContent = name;
+            nameFilter.appendChild(option);
+        });
+    }
+
+    // Date 드롭다운 채우기
+    function populateDateDropdown(selectedName) {
+        const dates = [...new Set(allItems
+            .filter(item => includeDeletedCheckbox.checked || !item.deletedAt)
+            .filter(item => !selectedName || item.name === selectedName)
+            .map(item => item.joiningDate))].sort((a, b) => b - a);
+
+        dateFilter.innerHTML = '<option value="">All Dates</option>';
+        dates.forEach(date => {
+            const option = document.createElement("option");
+            option.value = date;
+            option.textContent = date;
+            dateFilter.appendChild(option);
+        });
+    }
+
+    // 필터링된 데이터 가져오기
+    function getFilteredData() {
+        const selectedName = nameFilter.value;
+        const selectedDate = dateFilter.value;
+        const includeDeleted = includeDeletedCheckbox.checked;
+
+        var selectedItems = allItems.filter(item => {
+            const nameMatch = !selectedName || item.name === selectedName;
+            const dateMatch = !selectedDate || item.joiningDate === selectedDate;
+            const deletedMatch = includeDeleted || !item.deletedAt; // includeDeleted가 체크되었거나 삭제되지 않은 항목
+
+            return nameMatch && dateMatch && deletedMatch;
+        });
+
+        filteredItems = selectedItems;
+
+        return selectedItems;
+    }
+
+    // 필터 변경 시 데이터 필터링
+    clearAllFilter.addEventListener("click", () => {
+        nameFilter.value = '';
+        dateFilter.value = '';
+
+        populateNameDropdown();
+        populateDateDropdown();
+
+        renderTable(getFilteredData());
+    });
+
+    nameFilter.addEventListener("change", () => {
+        const previousName = nameFilter.value;
+        const previousDate = dateFilter.value;
+
+        populateDateDropdown(previousName);
+        restoreFilterSelection(previousName, previousDate)
+
+        renderTable(getFilteredData());
+    });
+
+    dateFilter.addEventListener("change", () => {
+        const previousName = nameFilter.value;
+        const previousDate = dateFilter.value;
+
+        populateNameDropdown(previousDate);
+        restoreFilterSelection(previousName, previousDate)
+
+        renderTable(getFilteredData());
+    });
+
+    includeDeletedCheckbox.addEventListener("change", () => {
+        const previousName = nameFilter.value;
+        const previousDate = dateFilter.value;
+
+        populateNameDropdown(previousDate);
+        populateDateDropdown(previousName);
+        restoreFilterSelection(previousName, previousDate)
+
+        renderTable(getFilteredData());
+    });
 
     // Fetch and display users
-    function fetchUsers() {
-        tableBody.innerHTML = ""; // Clear existing rows before fetching new data
-        const endpoint = includeDeletedCheckbox.checked ? "/api/Users" : "/api/Users/NotDeleted";
-        fetch(endpoint)
+    function fetchAllItem() {
+        fetch("/api/Users")
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Failed to fetch users");
                 }
                 return response.json();
             })
-            .then(users => {
-                tableBody.innerHTML = ""; // Clear existing rows
-                users.forEach(user => {
-                    const row = document.createElement("tr");
+            .then(data => {
+                allItems = data;
 
-                    row.innerHTML = `
-                        <td>${user.id}</td>
-                        <td>${user.name}</td>
-                        <td>${user.joiningDate}</td>
-                        <td>${user.resignationDate || "N/A"}</td>
-                        <td>${user.deletedAt ? formatToLocalDateTime(user.deletedAt) : "N/A"}</td>
-                        <td>${user.originId ? user.originId : "N/A"}</td>
-                        <td>
-                            <a href="Edit.html?id=${user.id}" class="edit-btn">Edit</a>
-                            <button class="softDelete-btn" data-id="${user.id}">Soft Delete</button>
-                            <button class="hardDelete-btn" data-id="${user.id}">Hard Delete</button>
-                        </td>
-                    `;
+                const previousName = nameFilter.value;
+                const previousDate = dateFilter.value;
 
-                    tableBody.appendChild(row);
-                });
+                populateNameDropdown(previousDate);
+                populateDateDropdown(previousName);
+                restoreFilterSelection(previousName, previousDate)
+
+                renderTable(getFilteredData());
             })
             .catch(error => {
                 console.error("Error fetching users:", error);
             });
     }
+
+    // 초기화
+    fetchAllItem();
 
     // Event listener for Hard Delete All button
     hardDeleteAllBtn.addEventListener("click", () => {
@@ -50,18 +168,13 @@
                         throw new Error("Failed to hard delete all users");
                     }
                     alert("All users have been hard deleted successfully!");
-                    fetchUsers(); // Refresh the table
+                    fetchAllItem(); // Refresh the table
                 })
                 .catch(error => {
                     alert("Error hard deleting all users. Please try again.");
                     console.error("Error hard deleting all users:", error);
                 });
         }
-    });
-
-    // Attach event listener to the checkbox
-    includeDeletedCheckbox.addEventListener("change", () => {
-        fetchUsers();
     });
 
     // Attach (hard or soft) delete event listeners
@@ -92,7 +205,7 @@
                     throw new Error(`Failed to ${type} delete user`);
                 }
                 alert(`User ${type} deleted successfully!`);
-                fetchUsers(); // Refresh the table
+                fetchAllItem(); // Refresh the table
             })
             .catch(error => {
                 alert(`Error ${type} deleting user. Please try again.`);
@@ -101,10 +214,15 @@
     }
 
     function formatToLocalDateTime(dateTimeString) {
-        if (!dateTimeString) return "N/A";
+        if (!dateTimeString) return "";
         return new Date(dateTimeString).toLocaleString();
     }
 
-    // Initial fetch
-    fetchUsers();
+    function restoreFilterSelection(previousName, previousDate) {
+        const nameOptions = Array.from(nameFilter.options).map(option => option.value);
+        const dateOptions = Array.from(dateFilter.options).map(option => option.value);
+
+        nameFilter.value = nameOptions.includes(previousName) ? previousName : "";
+        dateFilter.value = dateOptions.includes(previousDate) ? previousDate : "";
+    }
 });

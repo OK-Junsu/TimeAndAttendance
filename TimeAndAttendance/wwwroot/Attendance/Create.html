@@ -14,10 +14,13 @@
             <input type="number" id="userId" name="userId" required>
 
             <label for="time">Time:</label>
-            <input type="datetime-local" id="time" name="time" required>
+            <input type="datetime-local" id="time" name="time" required disabled>
 
             <label for="status">Status:</label>
-            <input type="text" id="status" name="status">
+            <select id="status" name="status" required>
+                <option value="In">In</option>
+                <option value="Out">Out</option>
+            </select>
 
             <div class="form-actions">
                 <button type="submit" class="button">Create</button>

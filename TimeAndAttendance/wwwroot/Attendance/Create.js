@@ -1,5 +1,12 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector("#createAttendanceForm");
+    const timeInput = document.querySelector("#time");
+
+    const now = new Date();
+    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 19); // 초 단위까지 설정
+    timeInput.value = localDateTime;
 
     form.addEventListener("submit", (event) => {
         event.preventDefault();

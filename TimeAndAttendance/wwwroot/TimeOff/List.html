@@ -14,15 +14,31 @@
             <a href="../Home.html" class="button back-btn">Back</a>
         </div>
         <div class="filter-container">
+            <button id="clearAllFilter" class="clear-all-filter-btn">Clear</button>
+
+            <button id="thisMonthBtn" class="this-month-btn">This Month</button>
+
             <select id="yearFilter" class="dropdown">
                 <option value="">All Years</option>
             </select>
-            <select id="monthFilter" class="dropdown">
+
+            <select id="monthFilter" class="dropdown" disabled>
                 <option value="">All Months</option>
             </select>
+
+            <select id="userFilter" class="dropdown">
+                <option value="">All Users</option>
+            </select>
+
             <div class="checkbox-container">
                 <input type="checkbox" id="includeDeleted" name="includeDeleted" checked="checked">
                 <label for="includeDeleted">Include Deleted</label>
+            </div>
+
+            <div class="tableSummary">
+                <a><span id="filteredItemsCount">0</span></a>
+                /
+                <a><span id="totalItemsCount">0</span></a>
             </div>
         </div>
         <table id="timeOffTable">

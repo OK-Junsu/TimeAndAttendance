@@ -17,7 +17,10 @@
             <input type="datetime-local" id="time" name="time" required>
 
             <label for="status">Status:</label>
-            <input type="text" id="status" name="status">
+            <select id="status" name="status" required>
+                <option value="In">In</option>
+                <option value="Out">Out</option>
+            </select>
 
             <div class="form-actions">
                 <button type="button" id="softUpdateBtn" class="button">Soft Update</button>

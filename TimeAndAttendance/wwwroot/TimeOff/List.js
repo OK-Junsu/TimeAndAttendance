@@ -1,39 +1,61 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
-    const hardDeleteAllBtn = document.querySelector("#hardDeleteAllBtn");
-    const includeDeletedCheckbox = document.querySelector("#includeDeleted");
+    const clearAllFilter = document.querySelector("#clearAllFilter");
+    const thisMonthBtn = document.querySelector("#thisMonthBtn");
     const yearFilter = document.querySelector("#yearFilter");
     const monthFilter = document.querySelector("#monthFilter");
+    const userFilter = document.querySelector("#userFilter");
+    const includeDeletedCheckbox = document.querySelector("#includeDeleted");
     const tableBody = document.querySelector("#timeOffTable tbody");
+    const hardDeleteAllBtn = document.querySelector("#hardDeleteAllBtn");
 
-    let allTimeOffs = []; // 전체 데이터를 저장
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1; // 월은 0부터 시작하므로 +1
+
+    let allItems = []; // 전체 데이터를 저장
+    let filteredItems = []; // 필터링 된 데이터를 저장
+
+    const typeDescriptions = {
+        "AnnualLeave": "Annual Leave",
+        "HalfDayOff": "Half Day Off",
+        "OtherPaidTimeOff": "Other Paid Time Off",
+        "NonPaidTimeOff": "Non-Paid Time Off",
+    };
 
     // 데이터를 테이블에 렌더링
     function renderTable(data) {
         tableBody.innerHTML = "";
-        data.forEach(timeOff => {
+        data.forEach(item => {
             const row = document.createElement("tr");
 
             row.innerHTML = `
-                <td>${timeOff.id}</td>
-                <td>${timeOff.userId}</td>
-                <td>${timeOff.date}</td>
-                <td>${timeOff.type}</td>
-                <td>${timeOff.deletedAt ? formatToLocalDateTime(timeOff.deletedAt) : "N/A"}</td>
-                <td>${timeOff.originId ? timeOff.originId : "N/A"}</td>
+                <td>${item.id}</td>
+                <td>${item.userId}</td>
+                <td>${item.date}</td>
+                <td>${typeDescriptions[item.type] || item.type}</td>
+                <td>${item.deletedAt ? formatToLocalDateTime(item.deletedAt) : ""}</td>
+                <td>${item.originId ? item.originId : ""}</td>
                 <td>
-                    <a href="Edit.html?id=${timeOff.id}" class="edit-btn">Edit</a>
-                    <button class="softDelete-btn" data-id="${timeOff.id}">Soft Delete</button>
-                    <button class="hardDelete-btn" data-id="${timeOff.id}">Hard Delete</button>
+                    <a href="Edit.html?id=${item.id}" class="edit-btn">Edit</a>
+                    <button class="softDelete-btn" data-id="${item.id}">Soft Delete</button>
+                    <button class="hardDelete-btn" data-id="${item.id}">Hard Delete</button>
                 </td>
             `;
 
             tableBody.appendChild(row);
         });
+
+        // Update tableSummary
+        totalItemsCount.textContent = allItems.length;
+        filteredItemsCount.textContent = filteredItems.length;
     }
 
     // Year 드롭다운 채우기
-    function populateYearDropdown() {
-        const years = [...new Set(allTimeOffs.map(to => new Date(to.date).getFullYear()))].sort((a, b) => b - a);
+    function populateYearDropdown(selectedUser) {
+        const years = [...new Set(allItems
+            .filter(item => includeDeletedCheckbox.checked || !item.deletedAt)
+            .filter(item => !selectedUser || item.userId === parseInt(selectedUser))
+            .map(item => new Date(item.date).getFullYear()))].sort((a, b) => b - a);
+
         yearFilter.innerHTML = '<option value="">All Years</option>';
         years.forEach(year => {
             const option = document.createElement("option");
@@ -44,11 +66,12 @@
     }
 
     // Month 드롭다운 채우기
-    function populateMonthDropdown(selectedYear) {
-        const months = [...new Set(
-            allTimeOffs
-                .filter(to => !selectedYear || new Date(to.date).getFullYear() === parseInt(selectedYear))
-                .map(to => new Date(to.date).getMonth() + 1)
+    function populateMonthDropdown(selectedYear, selectedUser) {
+        const months = [...new Set(allItems
+            .filter(item => includeDeletedCheckbox.checked || !item.deletedAt)
+            .filter(item => !selectedYear || new Date(item.date).getFullYear() === parseInt(selectedYear))
+            .filter(item => !selectedUser || item.userId === parseInt(selectedUser))
+            .map(to => new Date(to.date).getMonth() + 1)
         )].sort((a, b) => a - b);
 
         monthFilter.innerHTML = '<option value="">All Months</option>';
@@ -60,55 +83,150 @@
         });
     }
 
+    // User 드롭다운 채우기
+    function populateUserDropdown(selectedYear, selectedMonth) {
+        const users = [...new Set(allItems
+            .filter(item => includeDeletedCheckbox.checked || !item.deletedAt)
+            .filter(item => !selectedYear || new Date(item.date).getFullYear() === parseInt(selectedYear))
+            .filter(item => !selectedMonth || (new Date(item.date).getMonth() + 1) === parseInt(selectedMonth))
+            .map(item => item.userId))].sort((a, b) => a - b);
+
+        userFilter.innerHTML = '<option value="">All Users</option>';
+        users.forEach(user => {
+            const option = document.createElement("option");
+            option.value = user;
+            option.textContent = user;
+            userFilter.appendChild(option);
+        });
+    }
+
     // 필터링된 데이터 가져오기
     function getFilteredData() {
         const selectedYear = yearFilter.value;
         const selectedMonth = monthFilter.value;
+        const selectedUser = userFilter.value;
         const includeDeleted = includeDeletedCheckbox.checked;
 
-        return allTimeOffs.filter(to => {
-            const date = new Date(to.date);
+        var selectedItems = allItems.filter(item => {
+            const date = new Date(item.date);
+
             const yearMatch = !selectedYear || date.getFullYear() === parseInt(selectedYear);
             const monthMatch = !selectedMonth || (date.getMonth() + 1) === parseInt(selectedMonth);
-            const deletedMatch = includeDeleted || !to.deletedAt; // includeDeleted가 체크되었거나 삭제되지 않은 항목
-            return yearMatch && monthMatch && deletedMatch;
+            const userMatch = !selectedUser || item.userId === parseInt(selectedUser);
+            const deletedMatch = includeDeleted || !item.deletedAt; // includeDeleted가 체크되었거나 삭제되지 않은 항목
+
+            return yearMatch && monthMatch && userMatch && deletedMatch;
         });
+
+        filteredItems = selectedItems;
+
+        return selectedItems;
     }
 
     // 필터 변경 시 데이터 필터링
+    clearAllFilter.addEventListener("click", () => {
+        yearFilter.value = '';
+        monthFilter.value = '';
+        userFilter.value = '';
+        monthFilter.disabled = true;
+
+        populateYearDropdown();
+        populateMonthDropdown();
+        populateUserDropdown();
+
+        renderTable(getFilteredData());
+    });
+
+    thisMonthBtn.addEventListener("click", () => {
+        const previousYear = currentYear.toString();
+        const previousMonth = currentMonth.toString();
+        const previousUser = userFilter.value;
+
+        populateYearDropdown(previousUser);
+        populateMonthDropdown(previousYear, previousUser);
+        populateUserDropdown(previousYear, previousMonth);
+        restoreFilterSelection(previousYear, previousMonth, previousUser)
+
+        renderTable(getFilteredData());
+    });
+
     yearFilter.addEventListener("change", () => {
-        populateMonthDropdown(yearFilter.value); // 선택된 Year에 따라 Month 목록 갱신
+        const previousYear = yearFilter.value;
+        const previousMonth = monthFilter.value;
+        const previousUser = userFilter.value;
+
+        populateMonthDropdown(previousYear, previousUser);
+        populateUserDropdown(previousYear, previousMonth);
+        restoreFilterSelection(previousYear, previousMonth, previousUser)
+
         renderTable(getFilteredData());
     });
 
     monthFilter.addEventListener("change", () => {
+        const previousYear = yearFilter.value;
+        const previousMonth = monthFilter.value;
+        const previousUser = userFilter.value;
+
+        populateUserDropdown(previousYear, previousMonth);
+        restoreFilterSelection(previousYear, previousMonth, previousUser)
+
+        renderTable(getFilteredData());
+    });
+
+    userFilter.addEventListener("change", () => {
+        const previousYear = yearFilter.value;
+        const previousMonth = monthFilter.value;
+        const previousUser = userFilter.value;
+
+        populateYearDropdown(previousUser);
+        populateMonthDropdown(previousYear, previousUser);
+        restoreFilterSelection(previousYear, previousMonth, previousUser)
+
         renderTable(getFilteredData());
     });
 
     includeDeletedCheckbox.addEventListener("change", () => {
+        const previousYear = yearFilter.value;
+        const previousMonth = monthFilter.value;
+        const previousUser = userFilter.value;
+
+        populateYearDropdown(previousUser);
+        populateMonthDropdown(previousYear, previousUser);
+        populateUserDropdown(previousYear, previousMonth);
+        restoreFilterSelection(previousYear, previousMonth, previousUser)
+
         renderTable(getFilteredData());
     });
 
     // 초기 데이터 가져오기
-    function fetchTimeOffs() {
+    function fetchAllItem(isInitialFetch) {
         fetch("/api/TimeOffs") // 전체 데이터를 가져오는 API 호출
             .then(response => {
                 if (!response.ok) {
-                    throw new Error("Failed to fetch timeOffs");
+                    throw new Error("Failed to fetch time Offs");
                 }
                 return response.json();
             })
             .then(data => {
-                allTimeOffs = data;
-                populateYearDropdown();
-                populateMonthDropdown();
-                renderTable(allTimeOffs);
+                allItems = data;
+
+                // 현재 연도와 월로 초기 필터링 값 설정
+                const previousYear = isInitialFetch ? currentYear.toString() : yearFilter.value;
+                const previousMonth = isInitialFetch ? currentMonth.toString() : monthFilter.value;
+                const previousUser = userFilter.value;
+
+                populateYearDropdown(previousUser);
+                populateMonthDropdown(previousYear, previousUser);
+                populateUserDropdown(previousYear, previousMonth);
+                restoreFilterSelection(previousYear, previousMonth, previousUser)
+
+                renderTable(getFilteredData());
             })
             .catch(error => console.error("Error fetching time offs:", error));
     }
 
     // 초기화
-    fetchTimeOffs();
+    fetchAllItem(true);
 
     // Event listener for Hard Delete All button
     hardDeleteAllBtn.addEventListener("click", () => {
@@ -119,7 +237,7 @@
                         throw new Error("Failed to hard delete all timeOffs");
                     }
                     alert("All timeOffs have been hard deleted successfully!");
-                    fetchTimeOffs(); // Refresh the table
+                    fetchAllItem(); // Refresh the table
                 })
                 .catch(error => {
                     alert("Error hard deleting all timeOffs. Please try again.");
@@ -156,7 +274,7 @@
                     throw new Error(`Failed to ${type} delete timeOff`);
                 }
                 alert(`TimeOff ${type} deleted successfully!`);
-                fetchTimeOffs(); // Refresh the table
+                fetchAllItem(); // Refresh the table
             })
             .catch(error => {
                 alert(`Error ${type} deleting timeOff. Please try again.`);
@@ -165,7 +283,19 @@
     }
 
     function formatToLocalDateTime(dateTimeString) {
-        if (!dateTimeString) return "N/A";
+        if (!dateTimeString) return "";
         return new Date(dateTimeString).toLocaleString();
+    }
+
+    function restoreFilterSelection(previousYear, previousMonth, previousUser) {
+        const yearOptions = Array.from(yearFilter.options).map(option => option.value);
+        const monthOptions = Array.from(monthFilter.options).map(option => option.value);
+        const userOptions = Array.from(userFilter.options).map(option => option.value);
+
+        yearFilter.value = yearOptions.includes(previousYear) ? previousYear : ""; // Default: All Years
+        monthFilter.value = monthOptions.includes(previousMonth) ? previousMonth : ""; // Default: All Months
+        userFilter.value = userOptions.includes(previousUser) ? previousUser : ""; // Default: All Users
+
+        monthFilter.disabled = !yearFilter.value;
     }
 });

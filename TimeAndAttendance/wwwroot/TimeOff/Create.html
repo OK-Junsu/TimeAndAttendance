@@ -17,7 +17,12 @@
             <input type="date" id="date" name="date" required>
 
             <label for="type">Type:</label>
-            <input type="text" id="type" name="type" required>
+            <select id="type" name="type" required>
+                <option value="AnnualLeave">Annual Leave</option>
+                <option value="HalfDayOff">Half Day Off</option>
+                <option value="OtherPaidTimeOff">Other Paid Time Off</option>
+                <option value="NonPaidTimeOff">Non-Paid Time Off</option>
+            </select>
 
             <div class="form-actions">
                 <button type="submit" class="button">Create</button>

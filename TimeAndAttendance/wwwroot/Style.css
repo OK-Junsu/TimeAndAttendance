@@ -139,3 +139,42 @@ table {
     border: 1px solid #ddd;
     border-radius: 5px;
 }
+
+.clear-all-filter-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #6c757d;
+}
+
+    .clear-all-filter-btn:hover {
+        background-color: #5a6268;
+    }
+
+.this-month-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #4fb55b;
+}
+
+    .this-month-btn:hover {
+        background-color: #229d30;
+    }
+
+.tableSummary {
+    margin-left: auto;
+    text-align: right;
+    font-style: italic;
+    font-weight: bold;
+}
