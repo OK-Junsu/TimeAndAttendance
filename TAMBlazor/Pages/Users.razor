@@ -1,0 +1,171 @@
+﻿@page "/users"
+@using TAMBlazor.Models
+@using TAMBlazor.Services
+@inject UserService Service
+
+<PageTitle>User List</PageTitle>
+
+<h3>User List</h3>
+
+<h5>@(item.Id == 0 ? "Add" : "Edit")</h5>
+
+<EditForm Model="@item" OnValidSubmit="Save">
+	<DataAnnotationsValidator />
+	<div>
+		<label for="name">Name:</label>
+		<InputText id="name" class="form-control" @bind-Value="item.Name" placeholder="Name" />
+		<ValidationMessage For="@(() => item.Name)" />
+		<label for="joiningDate">Joining Date:</label>
+		<InputDate id="joiningDate" class="form-control mt-2" @bind-Value="item.JoiningDate" placeholder="Joining Date" />
+		<ValidationMessage For="@(() => item.JoiningDate)" />
+	</div>
+	@if (item.Id != 0)
+	{
+		<InputDate class="form-control mt-2" @bind-Value="item.ResignationDate" placeholder="Resignation Date" />
+		<div class="form-check mt-2">
+			<InputCheckbox class="form-check-input" @bind-Value="isHard" />
+			<label class="form-check-label" for="isHard">Hard Update</label>
+		</div>
+	}
+	<button class="btn btn-primary mt-2" type="submit">Save</button>
+	@if (item.Id != 0)
+	{
+		<button class="btn btn-secondary mt-2 ms-2" type="button" @onclick="Clear">Cancel</button>
+	}
+</EditForm>
+
+<hr />
+
+@if (users == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<div class="form-check mt-2">
+		<InputCheckbox class="form-check-input" @bind-Value="includeDeleted" @onclick="IncludeDeletedChanged" />
+		<label class="form-check-label" for="includeDeleted">Include Deleted</label>
+	</div>
+
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Name</th>
+				<th>Joining Date</th>
+				<th>Resignation Date</th>
+				<th>Creation Date</th>
+				<th>Deletion Date</th>
+				<th>Origin Id</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var user in users)
+			{
+				<tr>
+					<td>@user.Id</td>
+					<td>@user.Name</td>
+					<td>@user.JoiningDate</td>
+					<td>@user.ResignationDate</td>
+					<td>@user.CreatedAt</td>
+					<td>@user.DeletedAt</td>
+					<td>@user.OriginId</td>
+					<td>
+						<button class="btn btn-warning" @onclick="() => Edit(user)">Edit</button>
+						<button class="btn btn-danger" @onclick="() => SoftDelete(user.Id)">Soft</button>
+						<button class="btn btn-danger" @onclick="() => HardDelete(user.Id)">Hard</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
+	<button class="btn btn-danger" @onclick="() => HardDeleteAll()">Hard Delete All</button>
+}
+
+@code {
+	private List<User>? users;
+	private User item = new User { Name = string.Empty };
+	private bool isHard;
+	private bool includeDeleted = true;
+
+
+	protected override async Task OnInitializedAsync() => await Refresh();
+
+
+	private async Task Refresh()
+	{
+		users = includeDeleted ? await Service.GetAllItems() : await Service.GetNotDeletedItems();
+
+		Clear();
+	}
+	private async Task IncludeDeletedChanged()
+	{
+		includeDeleted = !includeDeleted;
+
+		await Refresh();
+	}
+	private async Task Save()
+	{
+		if (item.Id == 0)
+		{
+			var post = await Service.PostItem(item);
+			if (post == null)
+			{
+				item.Id = 0;
+				return;
+			}
+		}
+		else
+		{
+			if (isHard)
+			{
+				var hardPut = await Service.HardPutItem(item.Id, item);
+				if (!hardPut) return;
+			}
+			else
+			{
+				var softPut = await Service.SoftPutItem(item.Id, item);
+				if (!softPut) return;
+			}
+		}
+
+		await Refresh();
+	}
+	private void Edit(User targetItem)
+	{
+		item = new User
+			{
+				Id = targetItem.Id,
+				Name = targetItem.Name,
+				JoiningDate = targetItem.JoiningDate,
+				ResignationDate = targetItem.ResignationDate,
+			};
+	}
+	private async Task SoftDelete(int id)
+	{
+		var succeeded = await Service.SoftDeleteItem(id);
+		if (!succeeded) return;
+
+		await Refresh();
+	}
+	private async Task HardDelete(int id)
+	{
+		var succeeded = await Service.HardDeleteItem(id);
+		if (!succeeded) return;
+
+		await Refresh();
+	}
+	private void Clear() => item = new User
+		{
+			Name = string.Empty,
+			JoiningDate = DateOnly.FromDateTime(DateTime.Now)
+		};
+	private async Task HardDeleteAll()
+	{
+		await Service.HardDeleteAllItems();
+
+		await Refresh();
+	}
+}

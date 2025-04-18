@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35919.96 d17.13
+VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeAndAttendance", "TimeAndAttendance\TimeAndAttendance.csproj", "{B5223BB2-B89E-41BE-BBB0-D7F651B83399}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TAMBlazor", "TAMBlazor\TAMBlazor.csproj", "{944115E7-F9BE-4528-9467-F559EDC3EAA4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{B5223BB2-B89E-41BE-BBB0-D7F651B83399}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5223BB2-B89E-41BE-BBB0-D7F651B83399}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5223BB2-B89E-41BE-BBB0-D7F651B83399}.Release|Any CPU.Build.0 = Release|Any CPU
+		{944115E7-F9BE-4528-9467-F559EDC3EAA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{944115E7-F9BE-4528-9467-F559EDC3EAA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{944115E7-F9BE-4528-9467-F559EDC3EAA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{944115E7-F9BE-4528-9467-F559EDC3EAA4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
